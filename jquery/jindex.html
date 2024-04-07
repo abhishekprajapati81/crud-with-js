@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>User Management</h1>
+    <!-- Form for adding and editing users -->
+    <form id="userForm">
+      <input type="hidden" id="userId">
+      <input type="text" id="firstName" placeholder="First Name" required>
+      <input type="text" id="lastName" placeholder="Last Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <button type="submit">Add User</button>
+    </form>
+
+    <!-- Table to display user data -->
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Function to display user data in the table
+    function displayUsers() {
+      var users = JSON.parse(localStorage.getItem('users')) || [];
+      var tableBody = $('#userTable tbody');
+      tableBody.empty();
+      users.forEach(function(user, index) {
+        tableBody.append(`
+          <tr>
+            <td>${index + 1}</td>
+            <td>${user.firstName}</td>
+            <td>${user.lastName}</td>
+            <td>${user.email}</td>
+            <td>
+              <button class="editBtn" data-index="${index}">Edit</button>
+              <button class="deleteBtn" data-index="${index}">Delete</button>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    // Function to add or update a user
+    $('#userForm').submit(function(event) {
+      event.preventDefault();
+      var userId = $('#userId').val();
+      var firstName = $('#firstName').val();
+      var lastName = $('#lastName').val();
+      var email = $('#email').val();
+      var user = { id: userId, firstName: firstName, lastName: lastName, email: email };
+      var users = JSON.parse(localStorage.getItem('users')) || [];
+      if (userId) {
+        // Update existing user
+        users[userId - 1] = user;
+      } else {
+        // Add new user
+        users.push(user);
+      }
+      localStorage.setItem('users', JSON.stringify(users));
+      displayUsers();
+      $('#userForm')[0].reset();
+    });
+
+    // Function to edit a user
+    $(document).on('click', '.editBtn', function() {
+      var index = $(this).data('index');
+      var users = JSON.parse(localStorage.getItem('users')) || [];
+      var user = users[index];
+      $('#userId').val(user.id);
+      $('#firstName').val(user.firstName);
+      $('#lastName').val(user.lastName);
+      $('#email').val(user.email);
+    });
+
+    // Function to delete a user
+    $(document).on('click', '.deleteBtn', function() {
+      var index = $(this).data('index');
+      var users = JSON.parse(localStorage.getItem('users')) || [];
+      users.splice(index, 1);
+      localStorage.setItem('users', JSON.stringify(users));
+      displayUsers();
+    });
+
+    // Display users on page load
+    $(document).ready(function() {
+      displayUsers();
+    });
+  </script>
+</body>
+</html>
